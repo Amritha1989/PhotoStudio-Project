@@ -6,6 +6,6 @@ metadata:
 spec: 
   containers: 
     - name: pscont
-      image: amritha1989/photostudioim:latest
+      image: amritha1989/photostudio:latest
       ports:
         - containerPort: 3000
