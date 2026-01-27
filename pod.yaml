@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: photostudio
+  namespace: psns
+spec: 
+  containers: 
+    - name: pscont
+      image: amritha1989/photostudioim:latest
+      ports:
+        - containerPort: 3000
