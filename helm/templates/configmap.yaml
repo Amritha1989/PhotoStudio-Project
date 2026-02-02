@@ -1,0 +1,10 @@
+apiVersion: v1 
+kind: ConfigMap 
+metadata:
+  name: ps-config
+  namespace: ps-ns
+data:
+  MONGODB_URI: "mongodb://mongodb-service:27017/artgallery"
+  PORT: "3000"
+  HOST: "0.0.0.0"
+  NODE_ENV: "production"
