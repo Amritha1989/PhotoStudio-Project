@@ -1,6 +1,0 @@
-persistence:
-  app:
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: standard
-    size: 5Gi
