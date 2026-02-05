@@ -73,3 +73,10 @@ displayName: Update Helm values
 env:
 
 GITHUB_PAT: $(GITHUB_PAT)
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Kubernetes Manifests'
+  inputs:
+    targetPath: 'manifests'
+    artifact: 'k8s-manifests'
+    publishLocation: 'pipeline'
