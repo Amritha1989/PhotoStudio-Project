@@ -7,7 +7,7 @@ variables:
 
 imageName: photostudio
 
-acrLoginServer: 'projectps.azurecr.io'
+acrLoginServer: projectps.azurecr.io
 
 tag: $(Build.BuildId)
 
@@ -36,7 +36,7 @@ repository: $(imageName)
 
 dockerfile: Dockerfile
 
-containerRegistry: projectps
+containerRegistry: photostudio-app-SRsc
 
 tags: |
 
