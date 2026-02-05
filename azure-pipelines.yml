@@ -1,142 +1,75 @@
-# Deploy to Azure Kubernetes Service
-# Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
-- master
 
-resources:
-- repo: self
+- azure-devops
+
 
 variables:
 
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '5a4ce2ba-f8c6-4e6f-8bc2-e3bd2b2106bf'
-  imageRepository: 'photostudio'
-  containerRegistry: 'projectps.azurecr.io'
-  dockerfilePath: '**/Dockerfile'
-  tag: '$(Build.BuildId)'
-  imagePullSecret: 'projectps8439-auth'
+imageName: photostudio
 
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+acrLoginServer: 'projectps.azurecr.io'
 
-  # Name of the new namespace being created to deploy the PR changes.
-  k8sNamespaceForPR: 'review-app-$(System.PullRequest.PullRequestId)'
+tag: $(Build.BuildId)
 
-stages:
-- stage: Build
-  displayName: Build stage
-  jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
-      inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: Dockerfile
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
 
-    - upload: manifests
-      artifact: manifests
+pool:
 
-- stage: Deploy
-  displayName: Deploy stage
-  dependsOn: Build
+vmImage: ubuntu-latest
 
-  jobs:
-  - deployment: Deploy
-    condition: and(succeeded(), not(startsWith(variables['Build.SourceBranch'], 'refs/pull/')))
-    displayName: Deploy
-    pool:
-      vmImage: $(vmImageName)
-    environment: 'Amritha1989PhotoStudioProject.final'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: KubernetesManifest@0
-            displayName: Create imagePullSecret
-            inputs:
-              action: createSecret
-              secretName: $(imagePullSecret)
-              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
 
-          - task: KubernetesManifest@0
-            displayName: Deploy to Kubernetes cluster
-            inputs:
-              action: deploy
-              manifests: |
-                $(Pipeline.Workspace)/manifests/deployment.yml
-                $(Pipeline.Workspace)/manifests/service.yml
-              imagePullSecrets: |
-                $(imagePullSecret)
-              containers: |
-                $(containerRegistry)/$(imageRepository):$(tag)
+steps:
 
-  - deployment: DeployPullRequest
-    displayName: Deploy Pull request
-    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/pull/'))
-    pool:
-      vmImage: $(vmImageName)
+- checkout: self
 
-    environment: 'Amritha1989PhotoStudioProject.$(k8sNamespaceForPR)'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - reviewApp: final
+persistCredentials: true
 
-          - task: Kubernetes@1
-            displayName: 'Create a new namespace for the pull request'
-            inputs:
-              command: apply
-              useConfigurationFile: true
-              inline: '{ "kind": "Namespace", "apiVersion": "v1", "metadata": { "name": "$(k8sNamespaceForPR)" }}'
 
-          - task: KubernetesManifest@0
-            displayName: Create imagePullSecret
-            inputs:
-              action: createSecret
-              secretName: $(imagePullSecret)
-              namespace: $(k8sNamespaceForPR)
-              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+- task: Docker@2
 
-          - task: KubernetesManifest@0
-            displayName: Deploy to the new namespace in the Kubernetes cluster
-            inputs:
-              action: deploy
-              namespace: $(k8sNamespaceForPR)
-              manifests: |
-                $(Pipeline.Workspace)/manifests/deployment.yml
-                $(Pipeline.Workspace)/manifests/service.yml
-              imagePullSecrets: |
-                $(imagePullSecret)
-              containers: |
-                $(containerRegistry)/$(imageRepository):$(tag)
+displayName: Build and Push Image
 
-          - task: Kubernetes@1
-            name: get
-            displayName: 'Get services in the new namespace'
-            continueOnError: true
-            inputs:
-              command: get
-              namespace: $(k8sNamespaceForPR)
-              arguments: svc
-              outputFormat: jsonpath='http://{.items[0].status.loadBalancer.ingress[0].ip}:{.items[0].spec.ports[0].port}'
+inputs:
 
-          # Getting the IP of the deployed service and writing it to a variable for posing comment
-          - script: |
-              url="$(get.KubectlOutput)"
-              message="Your review app has been deployed"
-              if [ ! -z "$url" -a "$url" != "http://:" ]
-              then
-                message="${message} and is available at $url.<br><br>[Learn More](https://aka.ms/testwithreviewapps) about how to test and provide feedback for the app."
-              fi
-              echo "##vso[task.setvariable variable=GITHUB_COMMENT]$message"
+command: buildAndPush
+
+repository: $(imageName)
+
+dockerfile: Dockerfile
+
+containerRegistry: projectps
+
+tags: |
+
+$(tag)
+
+
+- script: |
+
+echo "Updating Helm values.yaml"
+
+
+sed -i "s/tag:.*/tag: \"$(tag)\"/" charts/photostudio-app/values.yaml
+
+
+git config user.email "azure-devops@pipeline.com"
+
+git config user.name "azure-devops"
+
+
+git fetch origin
+
+git checkout -B azure-devops origin/azure-devops
+
+
+git add charts/photostudio-app/values.yaml
+
+git commit -m "Update image tag to $(tag)"
+
+
+git push https://$GITHUB_PAT@github.com/Amritha1989/PhotoStudio-Project.git azure-devops
+
+displayName: Update Helm values
+
+env:
+
+GITHUB_PAT: $(GITHUB_PAT)
