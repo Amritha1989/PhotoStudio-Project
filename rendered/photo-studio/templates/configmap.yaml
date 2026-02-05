@@ -1,0 +1,13 @@
+---
+# Source: photo-studio/templates/configmap.yaml
+apiVersion: v1 
+kind: ConfigMap 
+metadata:
+  name: photostudio-app-ps-config
+  namespace: final
+data:
+  MONGODB_URI: "mongodb://mongodb-service.default.svc.cluster.local:27017"
+  # MONGODB_URI: mongodb://mongodb-service.{{ .Release.Namespace }}.svc.cluster.local:27017
+  PORT: "3000"
+  HOST: "0.0.0.0"
+  NODE_ENV: "production"

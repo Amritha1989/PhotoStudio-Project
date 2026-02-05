@@ -1,0 +1,6 @@
+---
+# Source: photo-studio/templates/ns.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: final

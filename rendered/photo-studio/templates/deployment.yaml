@@ -1,0 +1,35 @@
+---
+# Source: photo-studio/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: photostudio-app-deployment
+  namespace: final
+spec: 
+  replicas: 5
+  selector: 
+    matchLabels: 
+      app: ps
+  template: 
+    metadata:
+      labels: 
+        app: ps
+    spec:
+      containers:
+        - name: pscont
+          image: "amritha1989/photostudio:latest"
+          env:
+          - name: MONGODB_URI
+            value: "mongodb://mongodb-service.default.svc.cluster.local:27017"
+          ports: 
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: photostudio-app-ps-config
+          volumeMounts:
+            - name: ps-storage
+              mountPath: /app/storage
+      volumes:
+        - name: ps-storage
+          persistentVolumeClaim:
+            claimName: photostudio-app-ps-pvc

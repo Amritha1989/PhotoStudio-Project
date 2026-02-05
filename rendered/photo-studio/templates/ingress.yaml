@@ -1,0 +1,19 @@
+---
+# Source: photo-studio/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: photostudio-app-ingress
+  namespace: final
+spec: 
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: photostudio-app-ps-service
+                port: 
+                  number: 3000

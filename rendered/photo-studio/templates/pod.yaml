@@ -1,0 +1,13 @@
+---
+# Source: photo-studio/templates/pod.yaml
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: photostudio-app-pod
+  namespace: final
+spec: 
+  containers: 
+    - name: pscont
+      image: "amritha1989/photostudio:latest"
+      ports:
+        - containerPort: 3000
