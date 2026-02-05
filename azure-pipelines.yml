@@ -14,7 +14,7 @@ variables:
   dockerRegistryServiceConnection: '5a4ce2ba-f8c6-4e6f-8bc2-e3bd2b2106bf'
   imageRepository: 'photostudio'
   containerRegistry: 'projectps.azurecr.io'
-  dockerfilePath: '**/Dockerfile'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'projectps8439-auth'
 
