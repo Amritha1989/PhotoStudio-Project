@@ -7,8 +7,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Amritha1989/PhotoStudio-Project
-    path: charts/photostudio-app
-    targetRevision: *.*
+    targetRevision: azure-devops
+    path: charts/photostudio-app    
     helm:
       valueFiles:
         - values.yaml
