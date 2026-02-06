@@ -19,7 +19,7 @@ deployment:
   protocol: TCP
 image:
   repository: projectcr.azurecr.io/photostudio
-  tag: latest
+  tag: "1.0.0"
 configMapRef:
   configmapname: ps-config
 volumeMounts:
