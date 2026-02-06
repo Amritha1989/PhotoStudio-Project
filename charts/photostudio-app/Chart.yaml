@@ -2,7 +2,7 @@ apiVersion: v2
 name: photo-studio
 description: A Helm chart for Photo Studio Application with MongoDB
 type: application
-version: 1.0.1
+version: 1.0.2
 appVersion: "1.0"
 keywords:
   - photo-studio
@@ -16,3 +16,4 @@ maintainers:
     email: devops@example.com
 
 icon: https://example.com/icon.png
+
